@@ -1,34 +1,56 @@
-import java.util.Random;
 import java.util.Scanner;
 
 public class App {
-    public static void main(String[] args) throws Exception {
-        Scanner scanner = new Scanner(System.in);
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
 
-        String opc = "";
+        boolean jogarNovamente = true;
 
-        System.out.println("Com qual você deseja jogar?");
-        System.out.println("V -> Vermelho ");
-        System.out.println("A -> Azul");
-        opc = scanner.nextLine();
+        while (jogarNovamente) {
+            char[][] tabuleiro = tabuleiro();
+            char jog;
+            char comp = 'A';
+            boolean valid = false;
 
-        char[][] tabuleiro = tabuleiro();
+            do {
+                System.out.println("Escolha a cor que deseja jogar:");
+                System.out.println("V | Vermelho");
+                System.out.println("A | Azul");
+                jog = sc.next().toUpperCase().charAt(0);
 
-        switch (opc.toUpperCase()) {
-            case "V":
-                imprimirTabuleiro(tabuleiro);
-                jogarTurno(tabuleiro, 'V');
-                break;
-            case "A":
-                imprimirTabuleiro(tabuleiro);
-                jogarTurno(tabuleiro, 'A');
-                break;
+                switch (jog) {
+                    case 'V':
+                        comp = 'A';
+                        valid = true;
+                        break;
+                    case 'A':
+                        comp = 'V';
+                        valid = true;
+                        break;
+                    default:
+                        System.out.println("Opção inválida!");
+                        valid = false;
+                        break;
+                }
+            } while (!valid);
 
-            default:
-                break;
+            imprimirTabuleiro(tabuleiro);
+            boolean continuarJogo = true;
+
+            while (continuarJogo) {
+                continuarJogo = jogarTurno(sc, tabuleiro, jog, comp);
+
+                if (!continuarJogo) {
+                    System.out.println("Jogar novamente? (S/N)");
+                    char resp = sc.next().toUpperCase().charAt(0);
+                    jogarNovamente = (resp == 'S');
+                }
+            }
         }
 
-        scanner.close();
+        System.out.println("Fim do Jogo.");
+
+        sc.close();
     }
 
     public static char[][] tabuleiro() {
@@ -52,50 +74,50 @@ public class App {
         }
     }
 
-    public static void jogarTurno(char[][] tabuleiro, char jogador) {
-        Scanner scanner = new Scanner(System.in);
-        Random random = new Random();
+    public static boolean jogarTurno(Scanner sc, char[][] tabuleiro, char jog, char comp) {
+        boolean continuarJogo = true;
 
-        if (jogador == 'V') {
-            System.out.print("Jogador, escolha a coluna (0-6) para inserir a peça: ");
-            int coluna = scanner.nextInt();
+        if (jog == 'V' && comp == 'A' || jog == 'A' && comp == 'V') {
+        System.out.print("Jogador, escolha a coluna (0-6) para inserir a peça: ");
+        int coluna = sc.nextInt();
 
-            if (inserirPeca(tabuleiro, coluna, jogador)) {
+            if (inserirPeca(tabuleiro, coluna, jog)) {
                 imprimirTabuleiro(tabuleiro);
 
-                if (verificarVitoria(tabuleiro, jogador)) {
+                if (verificarVitoria(tabuleiro, jog)) {
                     System.out.println("Jogador venceu!");
-                    return;
+                    continuarJogo = false;
                 } else if (tabuleiroCheio(tabuleiro)) {
                     System.out.println("O jogo terminou em empate!");
-                    return;
+                    continuarJogo = false;
                 }
             } else {
                 System.out.println("Coluna inválida! Escolha novamente.");
-                jogarTurno(tabuleiro, jogador);
-                return;
+                return continuarJogo;
             }
-        } else if (jogador == 'A') {
-            int coluna = random.nextInt(tabuleiro[0].length);
 
-            if (inserirPeca(tabuleiro, coluna, jogador)) {
-                System.out.println("Computador jogou na coluna: " + coluna);
-                imprimirTabuleiro(tabuleiro);
+            int colunaComp = (int) (Math.random() * (7 - 0));
 
-                if (verificarVitoria(tabuleiro, jogador)) {
-                    System.out.println("Computador venceu!");
-                    return;
-                } else if (tabuleiroCheio(tabuleiro)) {
-                    System.out.println("O jogo terminou em empate!");
-                    return;
+            if (verificarVitoria(tabuleiro, jog) == false) {
+                if (inserirPeca(tabuleiro, colunaComp, comp)) {
+                    System.out.println("Computador jogou na coluna: " + colunaComp);
+                    imprimirTabuleiro(tabuleiro);
+    
+                    if (verificarVitoria(tabuleiro, comp)) {
+                        System.out.println("Jogador perdeu!");
+                        continuarJogo = false;
+                    } else if (tabuleiroCheio(tabuleiro)) {
+                        System.out.println("O jogo terminou em empate!");
+                        continuarJogo = false;
+                    }
+                } else {
+                    jogarTurno(sc, tabuleiro, jog, comp);
+                    continuarJogo = false;
                 }
-            } else {
-                jogarTurno(tabuleiro, jogador);
-                return;
             }
-        }
 
-        jogarTurno(tabuleiro, jogador == 'V' ? 'A' : 'V');
+        }
+        return continuarJogo;
     }
 
     public static boolean inserirPeca(char[][] tabuleiro, int coluna, char peca) {
@@ -116,35 +138,35 @@ public class App {
     public static boolean verificarVitoria(char[][] tabuleiro, char jogador) {
         for (int i = 0; i < tabuleiro.length; i++) {
             for (int j = 0; j <= tabuleiro[i].length - 4; j++) {
-                if (tabuleiro[i][j] == jogador && tabuleiro[i][j+1] == jogador &&
-                    tabuleiro[i][j+2] == jogador && tabuleiro[i][j+3] == jogador) {
+                if (tabuleiro[i][j] == jogador && tabuleiro[i][j + 1] == jogador &&
+                        tabuleiro[i][j + 2] == jogador && tabuleiro[i][j + 3] == jogador) {
                     return true;
                 }
             }
         }
-    
+
         for (int j = 0; j < tabuleiro[0].length; j++) {
             for (int i = 0; i <= tabuleiro.length - 4; i++) {
-                if (tabuleiro[i][j] == jogador && tabuleiro[i+1][j] == jogador &&
-                    tabuleiro[i+2][j] == jogador && tabuleiro[i+3][j] == jogador) {
+                if (tabuleiro[i][j] == jogador && tabuleiro[i + 1][j] == jogador &&
+                        tabuleiro[i + 2][j] == jogador && tabuleiro[i + 3][j] == jogador) {
                     return true;
                 }
             }
         }
-    
+
         for (int i = 0; i <= tabuleiro.length - 4; i++) {
             for (int j = 0; j <= tabuleiro[i].length - 4; j++) {
-                if (tabuleiro[i][j] == jogador && tabuleiro[i+1][j+1] == jogador &&
-                    tabuleiro[i+2][j+2] == jogador && tabuleiro[i+3][j+3] == jogador) {
+                if (tabuleiro[i][j] == jogador && tabuleiro[i + 1][j + 1] == jogador &&
+                        tabuleiro[i + 2][j + 2] == jogador && tabuleiro[i + 3][j + 3] == jogador) {
                     return true;
                 }
             }
         }
-    
+
         for (int i = 0; i <= tabuleiro.length - 4; i++) {
             for (int j = tabuleiro[i].length - 1; j >= 3; j--) {
-                if (tabuleiro[i][j] == jogador && tabuleiro[i+1][j-1] == jogador &&
-                    tabuleiro[i+2][j-2] == jogador && tabuleiro[i+3][j-3] == jogador) {
+                if (tabuleiro[i][j] == jogador && tabuleiro[i + 1][j - 1] == jogador &&
+                        tabuleiro[i + 2][j - 2] == jogador && tabuleiro[i + 3][j - 3] == jogador) {
                     return true;
                 }
             }
