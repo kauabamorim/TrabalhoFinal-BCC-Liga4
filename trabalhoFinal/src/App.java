@@ -58,7 +58,7 @@ public class App {
 
         for (int i = 0; i < tabuleiro.length; i++) {
             for (int j = 0; j < tabuleiro[i].length; j++) {
-                tabuleiro[i][j] = '-';
+                tabuleiro[i][j] = 'B';
             }
         }
 
@@ -126,7 +126,7 @@ public class App {
         }
 
         for (int i = tabuleiro.length - 1; i >= 0; i--) {
-            if (tabuleiro[i][coluna] == '-') {
+            if (tabuleiro[i][coluna] == 'B') {
                 tabuleiro[i][coluna] = peca;
                 return true;
             }
@@ -177,7 +177,7 @@ public class App {
     public static boolean tabuleiroCheio(char[][] tabuleiro) {
         for (int i = 0; i < tabuleiro.length; i++) {
             for (int j = 0; j < tabuleiro[i].length; j++) {
-                if (tabuleiro[i][j] == '-') {
+                if (tabuleiro[i][j] == 'B') {
                     return false;
                 }
             }
